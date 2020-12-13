@@ -1,0 +1,69 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.define "controlplane01" do |controlplane|
+    controlplane.vm.box = "ubuntu/bionic64"
+    controlplane.vm.hostname = "controlplane01"
+    controlplane.vm.network "private_network", ip: "192.168.100.10", netmask: "255.255.255.0",  hostname: true
+    controlplane.vm.network "private_network", ip: "172.30.0.10", netmask: "255.255.0.0"
+    controlplane.vm.provision "shell", path: "./provision/01-hostnames.sh"
+    controlplane.vm.provision "shell", path: "./provision/03-setup-ssh-keys.sh" 
+    controlplane.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.name = "controlplane01"
+    end
+  end
+
+  config.vm.define "controlplane02" do |controlplane|
+    controlplane.vm.box = "ubuntu/bionic64"
+    controlplane.vm.hostname = "controlplane02"
+    controlplane.vm.network "private_network", ip: "192.168.100.11", netmask: "255.255.255.0",  hostname: true
+    controlplane.vm.network "private_network", ip: "172.30.0.11", netmask: "255.255.0.0"
+    controlplane.vm.provision "shell", path: "./provision/01-hostnames.sh"
+    controlplane.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.name = "controlplane02"
+    end
+  end  
+
+  config.vm.define "node01" do |node|
+    node.vm.box = "ubuntu/bionic64"
+    node.vm.hostname = "node01"
+    node.vm.network "private_network", ip: "192.168.100.12", netmask: "255.255.255.0", hostname: true
+    node.vm.network "private_network", ip: "172.30.0.12", netmask: "255.255.0.0"
+    node.vm.provision "shell", path: "./provision/01-hostnames.sh"
+    node.vm.provision "shell", path: "./provision/02-install-docker.sh"
+    node.vm.provision "shell", path: "./provision/02_5-sysctl-worker-nodes.sh"
+    node.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.name = "node01"
+    end
+ end
+
+  config.vm.define "node02" do |node|
+    node.vm.box = "ubuntu/bionic64"
+    node.vm.hostname = "node02"
+    node.vm.network "private_network", ip: "192.168.100.13", netmask: "255.255.255.0", hostname: true
+    node.vm.network "private_network", ip: "172.30.0.13", netmask: "255.255.0.0"
+    node.vm.provision "shell", path: "./provision/01-hostnames.sh"
+    node.vm.provision "shell", path: "./provision/02-install-docker.sh"
+    node.vm.provision "shell", path: "./provision/02_5-sysctl-worker-nodes.sh"
+    node.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.name = "node02"
+    end
+  end
+
+  config.vm.define "loadbalancer" do |lb|
+    lb.vm.box = "ubuntu/bionic64"
+    lb.vm.hostname = "loadbalancer"
+    lb.vm.network "private_network", ip: "192.168.100.14", netmask: "255.255.255.0", hostname: true
+    lb.vm.provision "shell", path: "./provision/01-hostnames.sh"
+    lb.vm.provider "virtualbox" do |vb|
+      vb.memory = "512"
+      vb.name = "loadbalancer"
+    end
+  end  
+end
