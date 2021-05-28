@@ -11,11 +11,25 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "hello-world.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
   annotations:
+    {{- if .Values.ingress.https_enabled }}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    {{- end }}
+    {{- if .Values.ingress.delete_protection }}
+    alb.ingress.kubernetes.io/load-balancer-attributes: deletion_protection.enabled=true
+    {{- end }}
+    {{- if and (eq .Values.ingress.type "alb") (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer"))  }}
+    alb.ingress.kubernetes.io/target-type: instance
+    {{- else if and (eq .Values.service.type "ClusterIP") (eq .Values.ingress.type "alb") }}
+    alb.ingress.kubernetes.io/target-type: ip
+    {{- end }}
+  {{- with .Values.ingress.annotations }}  
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if eq .Values.ingress.type "alb" }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
   {{- if .Values.ingress.tls }}
   tls:
     {{- range .Values.ingress.tls }}
