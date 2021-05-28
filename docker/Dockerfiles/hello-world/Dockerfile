@@ -1,3 +1,6 @@
 FROM nginx:1.20.0
-ADD index.html its-works.jpg /usr/share/nginx/html/
+ARG APP_VERSION
+ADD index.html /usr/share/nginx/html
+ADD ./img/$APP_VERSION.* /usr/share/nginx/html
+RUN sed -i "s/VERSION/$APP_VERSION/g" /usr/share/nginx/html/index.html
 EXPOSE 80
