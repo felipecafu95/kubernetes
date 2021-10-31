@@ -10,8 +10,8 @@ spec:
         port:
            number: 8080
   rules:
-    - k8s.demo.com
-    - http:
+    - host: k8s.demo.com
+      http:
         paths:
           - path: /appa
             pathType: Prefix
